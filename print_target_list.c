@@ -1,15 +1,15 @@
 #include <stdio.h>
 // ReSharper disable once CppUnusedIncludeDirective
 #include <stdlib.h>
-#include <string.h>
 #include "targets/get_default_target.h"
+#include "targets/get_max_target_name_length.h"
 #include "targets/get_targets.h"
 #include "output_styles.h"
 #include "phingc_target.h"
 #include "print_target_list.h"
 
-
 bool print_target_list(const char *buildfile, const xmlNode *buildfile_root_node) {
+    // Get the full path the buildfile.
     char *resolved_buildfile = realpath(buildfile, nullptr);
     if (resolved_buildfile == nullptr) {
         printf(
@@ -76,20 +76,6 @@ bool print_target_list(const char *buildfile, const xmlNode *buildfile_root_node
     }
     printf("%s\n", output_styles.initial);
 
-    // Get longest target name.
-    int longest_target_name_length = 0;
-    for (const xmlNode *node = buildfile_root_node->children; node != nullptr; node = node->next) {
-        if (node->type == XML_ELEMENT_NODE && xmlStrcmp(node->name, BAD_CAST "target") == 0) {
-            xmlChar *name = xmlGetProp(node, BAD_CAST "name");
-            if (name == nullptr) {
-                continue;
-            }
-            const int len = xmlStrlen(name);
-            if (len > longest_target_name_length) longest_target_name_length = len;
-            xmlFree(name);
-        }
-    }
-
     // Build an array of targets.
     int targets_count;
     PhingCTarget **targets = get_targets(buildfile_root_node, &targets_count);
@@ -104,6 +90,9 @@ bool print_target_list(const char *buildfile, const xmlNode *buildfile_root_node
         xmlFree(project_default_prop);
         return false;
     }
+
+    // Get the length of the longest target name.
+    const int longest_target_name_length = get_max_target_name_length(targets, targets_count);
 
     // Get the default target.
     const PhingCTarget *default_target = get_default_target((char *) project_default_prop, targets, targets_count);
@@ -131,13 +120,6 @@ bool print_target_list(const char *buildfile, const xmlNode *buildfile_root_node
 
         putchar('\n');
     }
-
-    // Free the array of targets.
-    for (int i = 0; i < targets_count; i++) {
-        phingc_target_free(targets[i]);
-        free(targets[i]);
-    }
-    free(targets);
 
     printf("\n%sMain targets:\n", output_styles.purple_bold);
     for (int i = 0; i < 80; i++) {
@@ -167,6 +149,9 @@ bool print_target_list(const char *buildfile, const xmlNode *buildfile_root_node
             xmlFree(name);
         }
     }
+
+    phingc_targets_free(targets, targets_count);
+    free(targets);
 
     return true;
 }
