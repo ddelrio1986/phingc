@@ -93,6 +93,17 @@ bool print_target_list(const char *buildfile, const xmlNode *buildfile_root_node
     // Build an array of targets.
     int targets_count;
     PhingCTarget **targets = get_targets(buildfile_root_node, &targets_count);
+    if (targets == nullptr) {
+        printf(
+            "%s[ERROR]%s %sFailed to allocate memory for targets.%s\n",
+            output_styles.red_bold,
+            output_styles.initial,
+            output_styles.red,
+            output_styles.initial
+        );
+        xmlFree(project_default_prop);
+        return false;
+    }
 
     // Get the default target.
     const PhingCTarget *default_target = get_default_target((char *) project_default_prop, targets, targets_count);
@@ -122,17 +133,13 @@ bool print_target_list(const char *buildfile, const xmlNode *buildfile_root_node
     }
 
     // Free the array of targets.
-    if (targets != nullptr) {
-        for (int i = 0; i < targets_count; i++) {
-            phingc_target_free(targets[i]);
-            free(targets[i]);
-        }
-        free(targets);
+    for (int i = 0; i < targets_count; i++) {
+        phingc_target_free(targets[i]);
+        free(targets[i]);
     }
+    free(targets);
 
-    putchar('\n');
-
-    printf("%sMain targets:\n", output_styles.purple_bold);
+    printf("\n%sMain targets:\n", output_styles.purple_bold);
     for (int i = 0; i < 80; i++) {
         putchar('-');
     }

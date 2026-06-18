@@ -10,6 +10,10 @@ PhingCTarget **get_targets(const xmlNode *root_node, int *targets_count) {
     int targets_capacity = 8;
     
     PhingCTarget **targets = malloc(sizeof(PhingCTarget *) * targets_capacity);
+    if (targets == nullptr) {
+        return nullptr;
+    }
+
     for (
         const xmlNode *node = root_node->children;
         node != nullptr;
@@ -25,6 +29,21 @@ PhingCTarget **get_targets(const xmlNode *root_node, int *targets_count) {
             }
 
             PhingCTarget *target = malloc(sizeof(PhingCTarget));
+            if (target == nullptr) {
+                xmlFree(target_name_prop);
+
+                // Free the targets already in the array.
+                for (int i = 0; i < *targets_count; i++) {
+                    phingc_target_free(targets[i]);
+                    free(targets[i]);
+                }
+
+                // Free the array.
+                free(targets);
+
+                *targets_count = 0;
+                return nullptr;
+            }
             *target = phingc_target_new();
 
             target->name = strdup((char *) target_name_prop);
