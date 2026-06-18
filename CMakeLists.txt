@@ -24,7 +24,11 @@ add_executable(phingc main.c
         handle_arguments.h
         version.h
         phingc_target.c
-        phingc_target.h)
+        phingc_target.h
+        targets/get_targets.c
+        targets/get_targets.h
+        targets/get_default_target.c
+        targets/get_default_target.h)
 
 target_compile_options(phingc PRIVATE -fsanitize=address)
 target_link_options(phingc PRIVATE -fsanitize=address)

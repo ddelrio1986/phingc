@@ -2,11 +2,12 @@
 // ReSharper disable once CppUnusedIncludeDirective
 #include <stdlib.h>
 #include <string.h>
+#include "targets/get_default_target.h"
+#include "targets/get_targets.h"
 #include "output_styles.h"
 #include "phingc_target.h"
 #include "print_target_list.h"
 
-// TODO: finish -l output with alphabetize
 
 bool print_target_list(const char *buildfile, const xmlNode *buildfile_root_node) {
     char *resolved_buildfile = realpath(buildfile, nullptr);
@@ -89,115 +90,15 @@ bool print_target_list(const char *buildfile, const xmlNode *buildfile_root_node
         }
     }
 
-    // Build a pointer to an array of pointers to PhingCTarget structs.
-    int targets_count = 0;
-    int targets_capacity = 8;
-    // ReSharper disable once CppDFAMemoryLeak
-    PhingCTarget **targets = malloc(sizeof(PhingCTarget *) * targets_capacity);
-    for (
-        const xmlNode *a_buildfile_node = buildfile_root_node->children;
-        a_buildfile_node != nullptr;
-        a_buildfile_node = a_buildfile_node->next
-    ) {
-        if (
-            a_buildfile_node->type == XML_ELEMENT_NODE
-            && xmlStrcmp(a_buildfile_node->name, BAD_CAST "target") == 0
-        ) {
-            xmlChar *target_name_prop = xmlGetProp(a_buildfile_node, BAD_CAST "name");
-            if (target_name_prop == nullptr) {
-                continue;
-            }
+    // Build an array of targets.
+    int targets_count;
+    PhingCTarget **targets = get_targets(buildfile_root_node, &targets_count);
 
-            PhingCTarget *target = malloc(sizeof(PhingCTarget));
-            *target = phingc_target_new();
+    // Get the default target.
+    const PhingCTarget *default_target = get_default_target((char *) project_default_prop, targets, targets_count);
+    xmlFree(project_default_prop);
 
-            target->name = strdup((char *) target_name_prop);
-            xmlFree(target_name_prop);
-
-            xmlChar *target_description_prop = xmlGetProp(a_buildfile_node, BAD_CAST "description");
-            if (target_description_prop != nullptr) {
-                target->description = strdup((char *) target_description_prop);
-            }
-            xmlFree(target_description_prop);
-
-            xmlChar *target_depends_prop = xmlGetProp(a_buildfile_node, BAD_CAST "depends");
-            if (target_depends_prop != nullptr) {
-                target->depends = strdup((char *) target_depends_prop);
-            }
-            xmlFree(target_depends_prop);
-
-            if (targets_count == targets_capacity) {
-                targets_capacity *= 2;
-                // ReSharper disable once CppDFAMemoryLeak
-                PhingCTarget **new_targets = realloc(targets, targets_capacity * sizeof(PhingCTarget *));
-                if (new_targets == nullptr) {
-                    for (int i = 0; i < targets_count; i++) {
-                        phingc_target_free(targets[i]);
-                        free(targets[i]);
-                    }
-                    free(targets);
-                    phingc_target_free(target);
-                    free(target);
-                    xmlFree(project_default_prop);
-                    // ReSharper disable once CppDFAMemoryLeak
-                    return false;
-                }
-                targets = new_targets;
-            }
-            targets[targets_count] = target;
-            targets_count++;
-        }
-    }
-    for (int i = 0; i < targets_count; i++) {
-        phingc_target_free(targets[i]);
-    }
-    free(targets);
-
-    // Build a PhingCTarget populated with the node's attributes.
-    PhingCTarget *default_target = malloc(sizeof(PhingCTarget));
-    *default_target = phingc_target_new();
-    for (
-        const xmlNode *a_buildfile_node = buildfile_root_node->children;
-        a_buildfile_node != nullptr;
-        a_buildfile_node = a_buildfile_node->next
-    ) {
-        if (
-            a_buildfile_node->type == XML_ELEMENT_NODE
-            && xmlStrcmp(a_buildfile_node->name, BAD_CAST "target") == 0
-        ) {
-            // Grab the "name" property of the current XML node.
-            xmlChar *a_target_name_prop = xmlGetProp(a_buildfile_node, BAD_CAST "name");
-            if (a_target_name_prop == nullptr) {
-                continue;
-            }
-
-            // Check if the value of the "name" property on the current XML node matches the name of the default
-            // target for the project.
-            if (xmlStrcmp(a_target_name_prop, project_default_prop) == 0) {
-                // Within this if-statement we populate a PhingCTarget with the attributes of the current target node.
-                default_target->name = strdup((char *) a_target_name_prop);
-
-                xmlChar *a_target_description_prop = xmlGetProp(a_buildfile_node, BAD_CAST "description");
-                if (a_target_description_prop != nullptr) {
-                    default_target->description = strdup((char *) a_target_description_prop);
-                }
-                xmlFree(a_target_description_prop);
-
-                xmlChar *a_target_depends_prop = xmlGetProp(a_buildfile_node, BAD_CAST "depends");
-                if (a_target_depends_prop != nullptr) {
-                    default_target->depends = strdup((char *) a_target_depends_prop);
-                }
-                xmlFree(a_target_depends_prop);
-
-                xmlFree(a_target_name_prop);
-                break;
-            }
-
-            xmlFree(a_target_name_prop);
-        }
-    }
-
-    if (default_target->name != nullptr) {
+    if (default_target != nullptr) {
         // Print the name of the default target.
         printf(
             " %s%-*s%s",
@@ -219,9 +120,16 @@ bool print_target_list(const char *buildfile, const xmlNode *buildfile_root_node
 
         putchar('\n');
     }
-    phingc_target_free(default_target);
-    free(default_target);
-    xmlFree(project_default_prop);
+
+    // Free the array of targets.
+    if (targets != nullptr) {
+        for (int i = 0; i < targets_count; i++) {
+            phingc_target_free(targets[i]);
+            free(targets[i]);
+        }
+        free(targets);
+    }
+
     putchar('\n');
 
     printf("%sMain targets:\n", output_styles.purple_bold);
