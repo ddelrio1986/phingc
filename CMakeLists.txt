@@ -18,13 +18,13 @@ add_executable(phingc main.c
         get_buildfile.h
         is_buildfile_valid.c
         is_buildfile_valid.h
-        print_target_list.c
-        print_target_list.h
+        targets/print_target_list.c
+        targets/print_target_list.h
         handle_arguments.c
         handle_arguments.h
         version.h
-        phingc_target.c
-        phingc_target.h
+        targets/phingc_target.c
+        targets/phingc_target.h
         targets/get_targets.c
         targets/get_targets.h
         targets/get_default_target.c

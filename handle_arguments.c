@@ -9,7 +9,7 @@
 #include "output_styles.h"
 #include "print_argument_debug.h"
 #include "print_help.h"
-#include "print_target_list.h"
+#include "targets/print_target_list.h"
 #include "version.h"
 
 bool handle_arguments(const int argc, char *argv[]) {

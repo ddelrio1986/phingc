@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <libxml/tree.h>
-#include "../phingc_target.h"
 #include "get_targets.h"
+#include "phingc_target.h"
 
 PhingCTarget **get_targets(const xmlNode *root_node, int *targets_count) {
     *targets_count = 0;

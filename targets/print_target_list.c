@@ -1,10 +1,10 @@
 #include <stdio.h>
 // ReSharper disable once CppUnusedIncludeDirective
 #include <stdlib.h>
-#include "targets/get_default_target.h"
-#include "targets/get_max_target_name_length.h"
-#include "targets/get_targets.h"
-#include "output_styles.h"
+#include "../output_styles.h"
+#include "get_default_target.h"
+#include "get_max_target_name_length.h"
+#include "get_targets.h"
 #include "phingc_target.h"
 #include "print_target_list.h"
 
