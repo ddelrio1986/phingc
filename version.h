@@ -1,0 +1,6 @@
+#ifndef PHINGC_VERSION_H
+#define PHINGC_VERSION_H
+
+#define PHINGC_VERSION "0.1.0-dev"
+
+#endif //PHINGC_VERSION_H
