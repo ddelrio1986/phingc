@@ -5,6 +5,8 @@
 #include "get_targets.h"
 #include "phingc_target.h"
 
+void cleanup_failed_target_build(PhingCTarget *target, PhingCTarget **targets, int *targets_count);
+
 PhingCTarget **get_targets(const xmlNode *root_node, int *targets_count) {
     *targets_count = 0;
     int targets_capacity = 8;
@@ -40,28 +42,38 @@ PhingCTarget **get_targets(const xmlNode *root_node, int *targets_count) {
 
             target->name = strdup((char *) target_name_prop);
             xmlFree(target_name_prop);
+            if (target->name == nullptr) {
+                cleanup_failed_target_build(target, targets, targets_count);
+                return nullptr;
+            }
 
             xmlChar *target_description_prop = xmlGetProp(node, BAD_CAST "description");
             if (target_description_prop != nullptr) {
                 target->description = strdup((char *) target_description_prop);
+                if (target->description == nullptr) {
+                    cleanup_failed_target_build(target, targets, targets_count);
+                    xmlFree(target_description_prop);
+                    return nullptr;
+                }
+                xmlFree(target_description_prop);
             }
-            xmlFree(target_description_prop);
 
             xmlChar *target_depends_prop = xmlGetProp(node, BAD_CAST "depends");
             if (target_depends_prop != nullptr) {
                 target->depends = strdup((char *) target_depends_prop);
+                if (target->depends == nullptr) {
+                    cleanup_failed_target_build(target, targets, targets_count);
+                    xmlFree(target_depends_prop);
+                    return nullptr;
+                }
+                xmlFree(target_depends_prop);
             }
-            xmlFree(target_depends_prop);
 
             if (*targets_count == targets_capacity) {
                 targets_capacity *= 2;
                 PhingCTarget **new_targets = realloc(targets, targets_capacity * sizeof(PhingCTarget *));
                 if (new_targets == nullptr) {
-                    phingc_target_free(target);
-                    free(target);
-                    phingc_targets_free(targets, *targets_count);
-                    free(targets);
-                    *targets_count = 0;
+                    cleanup_failed_target_build(target, targets, targets_count);
                     return nullptr;
                 }
                 targets = new_targets;
@@ -72,4 +84,12 @@ PhingCTarget **get_targets(const xmlNode *root_node, int *targets_count) {
     }
 
     return targets;
+}
+
+void cleanup_failed_target_build(PhingCTarget *target, PhingCTarget **targets, int *targets_count) {
+    phingc_target_free(target);
+    free(target);
+    phingc_targets_free(targets, *targets_count);
+    free(targets);
+    *targets_count = 0;
 }

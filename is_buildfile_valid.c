@@ -18,7 +18,7 @@ bool is_buildfile_valid(const char *buildfile) {
         error = "can't be opened for reading";
     } else if (!S_ISREG(buildfile_stat.st_mode)) {
         is_valid = false;
-        error = "is a directory";
+        error = "is not a regular file";
     }
 
     if (!is_valid) {

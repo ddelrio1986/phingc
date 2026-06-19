@@ -1,5 +1,6 @@
 #ifndef PHINGC_TARGETS_GET_TARGETS_H
 #define PHINGC_TARGETS_GET_TARGETS_H
+
 #include <libxml/tree.h>
 #include "phingc_target.h"
 

@@ -39,12 +39,12 @@ phingc [options] [target [target2 [target3] ...]]
 
 ### Options
 
-| Flag | Description |
-|---|---|
-| `-h` `-help` | Print help message |
-| `-l` `-list` | List available targets in the build file |
-| `-v` `-version` | Print version information and exit |
-| `-d` `-debug` | Print debugging information |
+| Flag                     | Description                                |
+|:-------------------------|:-------------------------------------------|
+| `-h` `-help`             | Print help message                         |
+| `-l` `-list`             | List available targets in the build file   |
+| `-v` `-version`          | Print version information and exit         |
+| `-d` `-debug`            | Print debugging information                |
 | `-f` `-buildfile <file>` | Use given buildfile (default: `build.xml`) |
 
 ### Examples
@@ -99,7 +99,3 @@ Early development. Currently implemented:
 - `-d` / `-debug`
 - `-f` / `-buildfile`
 - `-l` / `-list`
-  - Buildfile path and project description
-  - Default target with depends list
-  - Main targets (alphabetized) with descriptions and depends
-  - Subtargets (alphabetized) with depends

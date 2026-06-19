@@ -68,6 +68,7 @@ bool handle_arguments(const int argc, char *argv[]) {
             output_styles.red,
             output_styles.initial
         );
+        xmlCleanupParser();
         return false;
     }
     const xmlNode *buildfile_root_node = xmlDocGetRootElement(buildfile_xmldoc);
@@ -80,12 +81,14 @@ bool handle_arguments(const int argc, char *argv[]) {
             output_styles.initial
         );
         xmlFreeDoc(buildfile_xmldoc);
+        xmlCleanupParser();
         return false;
     }
 
     if (show_target_list) {
         if (!print_target_list(buildfile, buildfile_root_node)) {
             xmlFreeDoc(buildfile_xmldoc);
+            xmlCleanupParser();
             return false;
         }
     }

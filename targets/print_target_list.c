@@ -1,21 +1,23 @@
-#include <stdio.h>
-// ReSharper disable once CppUnusedIncludeDirective
-#include <stdlib.h>
-#include <string.h>
-#include "../output_styles.h"
 #include "get_default_target.h"
 #include "get_max_target_name_length.h"
 #include "get_targets.h"
 #include "phingc_target.h"
+#include "print_target.h"
 #include "print_target_list.h"
 #include "print_targets.h"
+
+#include "../output_styles.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 static int target_name_cmp(const void *a, const void *b);
 
 bool print_target_list(const char *buildfile, const xmlNode *buildfile_root_node) {
-    // Get the full path the buildfile.
-    char *resolved_buildfile = realpath(buildfile, nullptr);
-    if (resolved_buildfile == nullptr) {
+    // Get the full path of the buildfile.
+    char *buildfile_realpath = realpath(buildfile, nullptr);
+    if (buildfile_realpath == nullptr) {
         printf(
             "%s[ERROR] Buildfile:%s %s'%s' does not exist!%s\n",
             output_styles.red_bold,
@@ -32,10 +34,10 @@ bool print_target_list(const char *buildfile, const xmlNode *buildfile_root_node
         output_styles.cyan_bold,
         output_styles.initial,
         output_styles.cyan,
-        resolved_buildfile,
+        buildfile_realpath,
         output_styles.initial
     );
-    free(resolved_buildfile);
+    free(buildfile_realpath);
 
     // Check if first tag is project.
     if (xmlStrcmp(buildfile_root_node->name, BAD_CAST "project") != 0) {
@@ -74,12 +76,6 @@ bool print_target_list(const char *buildfile, const xmlNode *buildfile_root_node
         xmlFree(project_description_prop);
     }
 
-    printf("%sDefault target:\n", output_styles.purple_bold);
-    for (int i = 0; i < 80; i++) {
-        putchar('-');
-    }
-    printf("%s\n", output_styles.initial);
-
     // Build an array of targets.
     int targets_count;
     PhingCTarget **targets = get_targets(buildfile_root_node, &targets_count);
@@ -103,29 +99,17 @@ bool print_target_list(const char *buildfile, const xmlNode *buildfile_root_node
     xmlFree(project_default_prop);
 
     if (default_target != nullptr) {
-        // Print the name of the default target.
-        printf(
-            " %s%-*s%s",
-            output_styles.purple,
-            longest_target_name_length,
-            default_target->name,
-            output_styles.initial
-        );
-
-        // Print the "depends" of the default target if it has one.
-        if (default_target->depends != nullptr) {
-            printf(
-                " %s- depends on: %s%s",
-                output_styles.purple,
-                default_target->depends,
-                output_styles.initial
-            );
+        printf("%sDefault target:\n", output_styles.purple_bold);
+        for (int i = 0; i < 80; i++) {
+            putchar('-');
         }
+        printf("%s\n", output_styles.initial);
 
-        putchar('\n');
+        print_target(default_target, longest_target_name_length);
     }
 
-    PhingCTarget **main_targets = malloc(sizeof(PhingCTarget *) * targets_count);
+    const size_t targets_list_min_count = targets_count > 0 ? targets_count : 1;
+    PhingCTarget **main_targets = malloc(sizeof(PhingCTarget *) * targets_list_min_count);
     if (main_targets == nullptr) {
         printf(
             "%s[ERROR]%s %sUnable to allocate memory for main targets.%s\n",
@@ -138,7 +122,7 @@ bool print_target_list(const char *buildfile, const xmlNode *buildfile_root_node
         free(targets);
         return false;
     }
-    PhingCTarget **subtargets = malloc(sizeof(PhingCTarget *) * targets_count);
+    PhingCTarget **subtargets = malloc(sizeof(PhingCTarget *) * targets_list_min_count);
     if (subtargets == nullptr) {
         printf(
             "%s[ERROR]%s %sUnable to allocate memory for subtargets.%s\n",
