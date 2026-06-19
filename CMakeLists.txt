@@ -30,7 +30,9 @@ add_executable(phingc main.c
         targets/get_default_target.c
         targets/get_default_target.h
         targets/get_max_target_name_length.c
-        targets/get_max_target_name_length.h)
+        targets/get_max_target_name_length.h
+        targets/print_targets.c
+        targets/print_targets.h)
 
 target_compile_options(phingc PRIVATE -fsanitize=address)
 target_link_options(phingc PRIVATE -fsanitize=address)

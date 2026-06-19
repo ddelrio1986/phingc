@@ -7,6 +7,7 @@
 #include "get_targets.h"
 #include "phingc_target.h"
 #include "print_target_list.h"
+#include "print_targets.h"
 
 bool print_target_list(const char *buildfile, const xmlNode *buildfile_root_node) {
     // Get the full path the buildfile.
@@ -121,11 +122,46 @@ bool print_target_list(const char *buildfile, const xmlNode *buildfile_root_node
         putchar('\n');
     }
 
+    PhingCTarget **main_targets = malloc(sizeof(PhingCTarget *) * targets_count);
+    if (main_targets == nullptr) {
+        printf(
+            "%s[ERROR]%s %sUnable to allocate memory for main targets.%s\n",
+            output_styles.red_bold,
+            output_styles.initial,
+            output_styles.red,
+            output_styles.initial
+        );
+        return false;
+    }
+    PhingCTarget **subtargets = malloc(sizeof(PhingCTarget *) * targets_count);
+    if (subtargets == nullptr) {
+        printf(
+            "%s[ERROR]%s %sUnable to allocate memory for subtargets.%s\n",
+            output_styles.red_bold,
+            output_styles.initial,
+            output_styles.red,
+            output_styles.initial
+        );
+        return false;
+    }
+    int main_targets_count = 0;
+    int subtargets_count = 0;
+    for (int i = 0; i < targets_count; i++) {
+        if (targets[i]->description != nullptr) {
+            main_targets[main_targets_count++] = targets[i];
+        } else {
+            subtargets[subtargets_count++] = targets[i];
+        }
+    }
+
     printf("\n%sMain targets:\n", output_styles.purple_bold);
     for (int i = 0; i < 80; i++) {
         putchar('-');
     }
     printf("%s\n", output_styles.initial);
+
+    print_targets(main_targets, main_targets_count, longest_target_name_length);
+    putchar('\n');
 
     printf("%sSubtargets:\n", output_styles.purple_bold);
     for (int i = 0; i < 80; i++) {
@@ -133,23 +169,10 @@ bool print_target_list(const char *buildfile, const xmlNode *buildfile_root_node
     }
     printf("%s\n", output_styles.initial);
 
-    for (const xmlNode *node = buildfile_root_node->children; node != nullptr; node = node->next) {
-        if (node->type == XML_ELEMENT_NODE && xmlStrcmp(node->name, BAD_CAST "target") == 0) {
-            xmlChar *name = xmlGetProp(node, BAD_CAST "name");
-            if (name == nullptr) {
-                continue;
-            }
-            printf(
-                " %s%-*s - TODO: Alpabetize and list depends on.%s\n",
-                output_styles.purple,
-                longest_target_name_length,
-                (char *) name,
-                output_styles.initial
-            );
-            xmlFree(name);
-        }
-    }
+    print_targets(subtargets, subtargets_count, longest_target_name_length);
 
+    free(main_targets);
+    free(subtargets);
     phingc_targets_free(targets, targets_count);
     free(targets);
 
