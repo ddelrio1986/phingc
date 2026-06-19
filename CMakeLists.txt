@@ -34,7 +34,9 @@ add_executable(phingc main.c
         targets/print_targets.c
         targets/print_targets.h
         targets/print_target.c
-        targets/print_target.h)
+        targets/print_target.h
+        default_buildfile.c
+        default_buildfile.h)
 
 target_compile_options(phingc PRIVATE -fsanitize=address)
 target_link_options(phingc PRIVATE -fsanitize=address)

@@ -7,6 +7,7 @@ void print_help() {
     printf("%sOptions:%s\n", output_styles.bold, output_styles.initial);
     printf(" %-21sprint this message\n", "-h -help");
     printf(" %-21slist available targets in this project\n", "-l -list");
+    printf(" %-21sgenerates an initial buildfile\n", "-i -init [file]");
     printf(" %-21sprint the version information and exit\n", "-v -version");
     printf(" %-21sprint debugging information\n", "-d -debug");
     printf(" %-21suse given buildfile\n", "-f -buildfile <file>");

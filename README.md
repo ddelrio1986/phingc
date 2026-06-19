@@ -43,6 +43,7 @@ phingc [options] [target [target2 [target3] ...]]
 |:-------------------------|:-------------------------------------------|
 | `-h` `-help`             | Print help message                         |
 | `-l` `-list`             | List available targets in the build file   |
+| `-i` `-init [file]`      | Generates an initial buildfile             |
 | `-v` `-version`          | Print version information and exit         |
 | `-d` `-debug`            | Print debugging information                |
 | `-f` `-buildfile <file>` | Use given buildfile (default: `build.xml`) |
@@ -95,7 +96,8 @@ See `example-buildfiles/` for examples.
 Early development. Currently implemented:
 
 - `-h` / `-help`
+- `-l` / `-list`
+- `-i` / `-init`
 - `-v` / `-version`
 - `-d` / `-debug`
 - `-f` / `-buildfile`
-- `-l` / `-list`
