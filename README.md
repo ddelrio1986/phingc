@@ -73,12 +73,20 @@ phingc uses the same XML build file format as Phing:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="MyProject" default="build">
-    <target name="build">
+<project name="MyProject" default="build" description="My project">
+    <target name="build" description="Build the project" depends="prepare">
         <echo msg="Building..." />
+    </target>
+    <target name="prepare">
+        <echo msg="Preparing..." />
     </target>
 </project>
 ```
+
+- Targets with a `description` attribute appear under **Main targets** in `-l` output.
+- Targets without a `description` appear under **Subtargets**.
+- The `default` attribute on `<project>` sets the default target.
+- The `depends` attribute lists comma-separated prerequisite targets.
 
 See `example-buildfiles/` for examples.
 
@@ -90,4 +98,8 @@ Early development. Currently implemented:
 - `-v` / `-version`
 - `-d` / `-debug`
 - `-f` / `-buildfile`
-- `-l` / `-list` (partial — target listing without dependency resolution)
+- `-l` / `-list`
+  - Buildfile path and project description
+  - Default target with depends list
+  - Main targets (alphabetized) with descriptions and depends
+  - Subtargets (alphabetized) with depends

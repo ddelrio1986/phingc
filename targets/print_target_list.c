@@ -1,6 +1,7 @@
 #include <stdio.h>
 // ReSharper disable once CppUnusedIncludeDirective
 #include <stdlib.h>
+#include <string.h>
 #include "../output_styles.h"
 #include "get_default_target.h"
 #include "get_max_target_name_length.h"
@@ -8,6 +9,8 @@
 #include "phingc_target.h"
 #include "print_target_list.h"
 #include "print_targets.h"
+
+static int target_name_cmp(const void *a, const void *b);
 
 bool print_target_list(const char *buildfile, const xmlNode *buildfile_root_node) {
     // Get the full path the buildfile.
@@ -131,6 +134,8 @@ bool print_target_list(const char *buildfile, const xmlNode *buildfile_root_node
             output_styles.red,
             output_styles.initial
         );
+        phingc_targets_free(targets, targets_count);
+        free(targets);
         return false;
     }
     PhingCTarget **subtargets = malloc(sizeof(PhingCTarget *) * targets_count);
@@ -142,8 +147,12 @@ bool print_target_list(const char *buildfile, const xmlNode *buildfile_root_node
             output_styles.red,
             output_styles.initial
         );
+        free(main_targets);
+        phingc_targets_free(targets, targets_count);
+        free(targets);
         return false;
     }
+
     int main_targets_count = 0;
     int subtargets_count = 0;
     for (int i = 0; i < targets_count; i++) {
@@ -153,6 +162,10 @@ bool print_target_list(const char *buildfile, const xmlNode *buildfile_root_node
             subtargets[subtargets_count++] = targets[i];
         }
     }
+
+    // Sort the targets alphabetically.
+    qsort(main_targets, main_targets_count, sizeof(PhingCTarget *), target_name_cmp);
+    qsort(subtargets, subtargets_count, sizeof(PhingCTarget *), target_name_cmp);
 
     printf("\n%sMain targets:\n", output_styles.purple_bold);
     for (int i = 0; i < 80; i++) {
@@ -177,4 +190,10 @@ bool print_target_list(const char *buildfile, const xmlNode *buildfile_root_node
     free(targets);
 
     return true;
+}
+
+static int target_name_cmp(const void *a, const void *b) {
+    const PhingCTarget *target_a = *(PhingCTarget **) a;
+    const PhingCTarget *target_b = *(PhingCTarget **) b;
+    return strcmp(target_a->name, target_b->name);
 }

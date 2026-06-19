@@ -16,14 +16,14 @@ void print_targets(PhingCTarget **targets, const int targets_count, const int lo
         bool has_description = false;
         if (targets[i]->description != nullptr) {
             has_description = true;
-            printf("%s%s%s\n", output_styles.purple, targets[i]->description, output_styles.initial);
+            printf(" %s%s%s\n", output_styles.purple, targets[i]->description, output_styles.initial);
         }
 
         bool has_depends = false;
         if (targets[i]->depends != nullptr) {
             has_depends = true;
             if (has_description) {
-                printf("%-*s", longest_target_name_length, "");
+                printf("%-*s ", longest_target_name_length, "");
             }
             printf(
                 " %s- depends on: %s%s\n",
