@@ -7,6 +7,7 @@
 #include "print_targets.h"
 
 #include "../output_styles.h"
+#include "../print_buildfile.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,29 +16,9 @@
 static int target_name_cmp(const void *a, const void *b);
 
 bool print_target_list(const char *buildfile, const xmlNode *buildfile_root_node) {
-    // Get the full path of the buildfile.
-    char *buildfile_realpath = realpath(buildfile, nullptr);
-    if (buildfile_realpath == nullptr) {
-        printf(
-            "%s[ERROR] Buildfile:%s %s'%s' does not exist!%s\n",
-            output_styles.red_bold,
-            output_styles.initial,
-            output_styles.red,
-            buildfile,
-            output_styles.initial
-        );
+    if (!print_buildfile(buildfile)) {
         return false;
-    }
-
-    printf(
-        "%sBuildfile:%s %s%s%s\n",
-        output_styles.cyan_bold,
-        output_styles.initial,
-        output_styles.cyan,
-        buildfile_realpath,
-        output_styles.initial
-    );
-    free(buildfile_realpath);
+    };
 
     // Check if first tag is project.
     if (xmlStrcmp(buildfile_root_node->name, BAD_CAST "project") != 0) {

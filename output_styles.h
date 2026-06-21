@@ -5,6 +5,8 @@ typedef struct {
     const char *bold;
     const char *cyan;
     const char *cyan_bold;
+    const char *green;
+    const char *green_bold;
     const char *initial;
     const char *purple;
     const char *purple_bold;

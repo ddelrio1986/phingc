@@ -1,4 +1,5 @@
 #include "targets/print_target_list.h"
+#include "targets/run_default_target.h"
 
 #include "default_buildfile.h"
 #include "get_buildfile.h"
@@ -151,6 +152,9 @@ bool handle_arguments(const int argc, char *argv[]) {
             return false;
         }
     }
+
+    // Run the default target.
+    return run_default_target(buildfile, buildfile_root_node);
 
     xmlFreeDoc(buildfile_xmldoc);
     xmlCleanupParser();
